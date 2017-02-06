@@ -36,26 +36,26 @@ start() {
     touch $pidfile
     chown $USER $pidfile
 
-    sudo -H -u $USER $forever start --pidFile $pidfile -l $logfile -a --sourceDir $SOUREC_DIR -w agent.js -c $COMMAND $SOURCE_NAME
+    $forever start --pidFile $pidfile -l $logfile -a --sourceDir $SOUREC_DIR -w agent.js -c $COMMAND $SOURCE_NAME
 
     RETVAL=$?
 }
 
 restart() {
     echo -n "Restarting $NAME node instance : "
-    sudo -H -u $USER $forever restart $SOURCE_NAME
+    $forever restart $SOURCE_NAME
     RETVAL=$?
 }
 
 status() {
     echo "Status for $NAME:"
-    sudo -H -u $USER $forever list
+    $forever list
     RETVAL=$?
 }
 
 stop() {
     echo -n "Shutting down $NAME node instance : "
-    sudo -H -u $USER $forever stop $SOURCE_NAME
+    $forever stop $SOURCE_NAME
 }
 
 case "$1" in
