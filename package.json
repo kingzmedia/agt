@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "auto-updater":{
-    "repo":"/kingzmedia/agt.git",
+    "repo":"kingzmedia/agt",
     "branch":"master"
   },
   "repository": {
