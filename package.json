@@ -25,6 +25,7 @@
     "os": "^0.1.1",
     "socket.io": "^1.7.2",
     "socket.io-client": "^1.7.2",
-    "systeminformation": "^3.16.0"
+    "systeminformation": "^3.16.0",
+    "promise":"^7.1.1"
   }
 }
