@@ -243,7 +243,11 @@ fs.readFile('/var/lib/node_agent/key.config', 'utf8', function (err,data) {
         });
     }
 
-    setTimeout(function() { autoupdater.fire('check'); }, 5000)
+    function checkUpdates() {
+        autoupdater.fire('check');
+        console.log("check update!");
+    }
+    setTimeout(checkUpdates, 5000)
 
 });
 
