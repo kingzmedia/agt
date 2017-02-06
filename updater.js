@@ -5,7 +5,7 @@ var autoupdater = new AutoUpdater({
     autoupdate: false,
     checkgit: true,
     jsonhost: 'raw.githubusercontent.com',
-    contenthost: 'kingzmedia.github.com',
+    contenthost: 'codeload.github.com',
     progressDebounce: 0,
     devmode: true
 });
