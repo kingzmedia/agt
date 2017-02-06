@@ -87,7 +87,7 @@ fs.readFile('/var/lib/node_agent/key.config', 'utf8', function (err,data) {
 
     server.listen(11687);
 
-}
+});
 
 
 
