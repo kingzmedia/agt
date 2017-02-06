@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/kingzmedia/agt#readme",
   "dependencies": {
+    "auto-updater": "^1.0.2",
     "os": "^0.1.1",
     "socket.io": "^1.7.2",
     "socket.io-client": "^1.7.2",
