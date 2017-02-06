@@ -15,15 +15,15 @@
 # Then use commands:
 # service devshelf <command (start|stop|etc)>
 
-NAME=node_agent_recolt                            # Unique name for the application
-SOUREC_DIR=/home/maxime/agt           # Location of the application source
-COMMAND=node                             # Command to run
-SOURCE_NAME=agent.js                       # Name os the applcation entry point script
-USER=maxime                                # User for process running
-NODE_ENVIROMENT=production               # Node environment
+NAME=node_agent
+SOUREC_DIR=/var/lib/node_agent
+COMMAND=node
+SOURCE_NAME=agent.js
+USER=root
+NODE_ENVIROMENT=production
 
-pidfile=/tmp/agt-$NAME.pid #/var/run/$NAME.pid
-logfile=/tmp/agt-$NAME.log #/var/log/$NAME.log
+pidfile=/var/log/$NAME.pid
+logfile=/var/log/$NAME.log
 forever=forever
 
 start() {
