@@ -245,9 +245,9 @@ fs.readFile('/var/lib/node_agent/key.config', 'utf8', function (err,data) {
 
     function checkUpdates() {
         autoupdater.fire('check');
-        console.log("check update!");
     }
-    setTimeout(checkUpdates, 5000)
+    checkUpdates();
+    setTimeout(checkUpdates, 1000*60*10)
 
 });
 
