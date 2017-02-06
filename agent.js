@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 var socket = require('socket.io-client')('http://163.172.38.81:9998');
 var si = require('systeminformation');
 var os = require('os');
