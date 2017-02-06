@@ -63,7 +63,18 @@ fs.readFile('/var/lib/node_agent/key.config', 'utf8', function (err,data) {
     var _local = {};
     _local.netCards = [];
     _local.services = [];
-    _local.data = { cpuload: null, mem_total: null, mem_used: null, users: [], process: [], network_rx_sec: null, network_tx_sec: null, diskspace_used: null, diskspace_total: null, storage : null };
+    _local.data = {
+        cpuload: null,
+        mem_total: null,
+        mem_used: null,
+        users: [],
+        process: [],
+        network_rx_sec: null,
+        network_tx_sec: null,
+        diskspace_used: null,
+        diskspace_total: null,
+        storage: null
+    };
 
 
 
@@ -87,139 +98,140 @@ fs.readFile('/var/lib/node_agent/key.config', 'utf8', function (err,data) {
 
     server.listen(11687);
 
-});
 
-
-
-function sendToWs(data,action) {
-    var json = {query:data,timestamp: new Date().getTime(), date: new Date(), hash:hash};
-    var json = JSON.stringify(json);
-    socket.emit('data_'+action,json);
-}
-
-
-
-
-function sendPingService() {
-    var _hosts = ["google.com","bing.com","ovh.com"];
-    for(var i=0;i<_hosts.length;i++) {
-        si.inetLatency(_hosts[i], function (d) {
-            sendToWs({host:_hosts[i], ms: d}, "pingservice");
-        });
+    function sendToWs(data,action) {
+        var json = {query:data,timestamp: new Date().getTime(), date: new Date(), hash:hash};
+        var json = JSON.stringify(json);
+        socket.emit('data_'+action,json);
     }
-}
 
-function sendNetworkStats() {
-    if(_local.netCards != null) {
-        var tmp = [];
-        for (var i=0;i<_local.netCards.length;i++) {
-            if(typeof _local.netCards[i].iface != "undefined") {
-                si.networkStats(_local.netCards[i].iface, function (d) {
-                    if(d.rx_sec >=0) {
-                        sendToWs(d, "networkstats");
-                    }
-                });
+
+
+
+    function sendPingService() {
+        var _hosts = ["google.com","bing.com","ovh.com"];
+        for(var i=0;i<_hosts.length;i++) {
+            si.inetLatency(_hosts[i], function (d) {
+                sendToWs({host:_hosts[i], ms: d}, "pingservice");
+            });
+        }
+    }
+
+    function sendNetworkStats() {
+        if(_local.netCards != null) {
+            var tmp = [];
+            for (var i=0;i<_local.netCards.length;i++) {
+                if(typeof _local.netCards[i].iface != "undefined") {
+                    si.networkStats(_local.netCards[i].iface, function (d) {
+                        if(d.rx_sec >=0) {
+                            sendToWs(d, "networkstats");
+                        }
+                    });
+                }
             }
+
         }
-
     }
-}
 
 
-function sendServiceCheck() {
-    if(typeof _local.services.length > 0) {
-        si.inetLatency(_local.services, function (d) {
-            sendToWs(d, "servicecheck");
+    function sendServiceCheck() {
+        if(typeof _local.services.length > 0) {
+            si.inetLatency(_local.services, function (d) {
+                sendToWs(d, "servicecheck");
+            });
+        }
+    }
+
+
+    function sendNetworkCon() {
+        si.fsStats(function (d) {
+            sendToWs(d, "networkconnections");
         });
     }
-}
 
+    function sendFsSize() {
+        si.fsSize(function(d) { sendToWs(d, "fssize")})
+    }
 
-function sendNetworkCon() {
-    si.fsStats(function (d) {
-        sendToWs(d, "networkconnections");
-    });
-}
+    function sendFsstats() {
+        si.fsStats(function (d) {
+            if(d.rx_sec >= 0) {
+                sendToWs(d, "fsstats");
+            }
+        });
+    }
 
-function sendFsSize() {
-    si.fsSize(function(d) { sendToWs(d, "fssize")})
-}
+    function sendDisksio() {
+        si.disksIO(function (d) {
+            if(d.rIO_sec >= 0) {
+                sendToWs(d, "disksio");
+            }
+        });
+    }
 
-function sendFsstats() {
-    si.fsStats(function (d) {
-        if(d.rx_sec >= 0) {
-            sendToWs(d, "fsstats");
-        }
-    });
-}
-
-function sendDisksio() {
-    si.disksIO(function (d) {
-        if(d.rIO_sec >= 0) {
-            sendToWs(d, "disksio");
-        }
-    });
-}
-
-function sendCpu() {
-    si.currentLoad(function (d) {
-        sendToWs(d, "cpuload");
-    });
-}
-function sendMemory() {
-    si.mem(function (d) {
-        sendToWs(d, "memory");
-    });
-}
-function sendServerData() {
-    var server_data = {};
-    si.networkInterfaces(function (d) {
-        server_data.networks = JSON.stringify(d);
-        _local.netCards = d;
-        si.system(function (d) {
-            server_data.system = JSON.stringify(d);
-            si.osInfo(function (d) {
-                server_data.os = JSON.stringify(d);
-                si.cpu(function (d) {
-                    server_data.cpus = JSON.stringify(d);
-                    si.mem(function (d) {
-                        server_data.total_mem = d.total;
-                        var _date = new Date();
-                        _date.setSeconds(parseInt(_date.getSeconds()-(os.uptime())));
-                        server_data.uptime = _date;
-                        sendToWs(server_data,"server");
+    function sendCpu() {
+        si.currentLoad(function (d) {
+            sendToWs(d, "cpuload");
+        });
+    }
+    function sendMemory() {
+        si.mem(function (d) {
+            sendToWs(d, "memory");
+        });
+    }
+    function sendServerData() {
+        var server_data = {};
+        si.networkInterfaces(function (d) {
+            server_data.networks = JSON.stringify(d);
+            _local.netCards = d;
+            si.system(function (d) {
+                server_data.system = JSON.stringify(d);
+                si.osInfo(function (d) {
+                    server_data.os = JSON.stringify(d);
+                    si.cpu(function (d) {
+                        server_data.cpus = JSON.stringify(d);
+                        si.mem(function (d) {
+                            server_data.total_mem = d.total;
+                            var _date = new Date();
+                            _date.setSeconds(parseInt(_date.getSeconds()-(os.uptime())));
+                            server_data.uptime = _date;
+                            sendToWs(server_data,"server");
+                        });
                     });
                 });
             });
         });
-    });
-}
-function retrieveData() {
-    si.users(function (d) {
-        _local.data.users = d;
-    });
-    si.processes(function (d) {
-        _local.data.process = d;
-    });
-    si.mem(function (d) {
-        _local.data.mem_used = d.used;
-        _local.data.mem_total = d.total;
-    });
+    }
+    function retrieveData() {
+        si.users(function (d) {
+            _local.data.users = d;
+        });
+        si.processes(function (d) {
+            _local.data.process = d;
+        });
+        si.mem(function (d) {
+            _local.data.mem_used = d.used;
+            _local.data.mem_total = d.total;
+        });
 
-    si.currentLoad(function (d) {
-        _local.data.cpuload = d.currentload;
-    });
-    si.networkStats(function (d) {
-        _local.data.network_rx_sec = d.rx_sec;
-        _local.data.network_tx_sec = d.tx_sec;
-    });
-    si.fsSize(function(d) {
-        var tmpused = 0; var tmptotal = 0; var percent = 0;
-        for(var i=0;i < d.length; i++) {
-            tmpused += d[i].used; tmptotal += d[i].size;
-            if(i == (d.length-1)) {
-                _local.data.storage = Math.floor(tmpused/tmptotal*100);
+        si.currentLoad(function (d) {
+            _local.data.cpuload = d.currentload;
+        });
+        si.networkStats(function (d) {
+            _local.data.network_rx_sec = d.rx_sec;
+            _local.data.network_tx_sec = d.tx_sec;
+        });
+        si.fsSize(function(d) {
+            var tmpused = 0; var tmptotal = 0; var percent = 0;
+            for(var i=0;i < d.length; i++) {
+                tmpused += d[i].used; tmptotal += d[i].size;
+                if(i == (d.length-1)) {
+                    _local.data.storage = Math.floor(tmpused/tmptotal*100);
+                }
             }
-        }
-    });
-}
+        });
+    }
+
+});
+
+
