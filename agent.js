@@ -4,6 +4,17 @@ var si = require('systeminformation');
 var os = require('os');
 var fs = require('fs');
 var _local = {};
+var AutoUpdater = require('auto-updater');
+var autoupdater = new AutoUpdater({
+    pathToJson: '',
+    autoupdate: false,
+    checkgit: false,
+    jsonhost: 'raw.githubusercontent.com',
+    contenthost: 'codeload.github.com',
+    progressDebounce: 0,
+    devmode: true
+});
+
 _local.netCards = [];
 _local.services = [];
 
@@ -231,6 +242,8 @@ fs.readFile('/var/lib/node_agent/key.config', 'utf8', function (err,data) {
             }
         });
     }
+
+    setTimeout(function() { autoupdater.fire('check'); }, 5000)
 
 });
 
