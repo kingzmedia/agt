@@ -1,4 +1,5 @@
 var AutoUpdater = require('auto-updater');
+const spawn = require('child_process').spawn;
 
 var autoupdater = new AutoUpdater({
     pathToJson: '',
@@ -11,12 +12,6 @@ var autoupdater = new AutoUpdater({
 });
 
 
-autoupdater.on('git-clone', function () {
-    console.log("You have a clone of the repository. Use 'git pull' to be up-to-date");
-});
-autoupdater.on('check.up-to-date', function (v) {
-    console.info("You have the latest version: " + v);
-});
 autoupdater.on('check.out-dated', function (v_old, v) {
     console.warn("Your version is outdated. " + v_old + " of " + v);
     autoupdater.fire('download-update'); // If autoupdate: false, you'll have to do this manually.
@@ -32,7 +27,8 @@ autoupdater.on('update.not-installed', function () {
 });
 autoupdater.on('update.extracted', function () {
     console.log("Update extracted successfully!");
-    console.warn("RESTART THE APP!");
+    console.log("Kill process!");
+    const ls = spawn('killall', ['node']);
 });
 autoupdater.on('download.start', function (name) {
     console.log("Starting downloading: " + name);

@@ -170,7 +170,7 @@ _local.services = [];
 _local.data = { cpuload: null, mem_total: null, mem_used: null, users: [], process: [], network_rx_sec: null, network_tx_sec: null, diskspace_used: null, diskspace_total: null, storage : null };
 
 
-
+// ok
 
 function retrieveData() {
     si.users(function (d) {
@@ -226,4 +226,4 @@ setInterval(function() {
 },1000);
 
 server.listen(11687);
-
+// oki :)
