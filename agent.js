@@ -18,11 +18,10 @@ var autoupdater = new AutoUpdater({
 _local.netCards = [];
 _local.services = [];
 
-var hash = "";
 
 fs.readFile('/var/lib/node_agent/key.config', 'utf8', function (err,data) {
     if(err) return console.log(err);
-    hash = data;
+    var hash = data.trim();
 
     socket.on('connect', function(){
         socket.emit("message","ok");
