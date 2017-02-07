@@ -1,8 +1,22 @@
 'use strict'
+//https://www.npmjs.com/package/microstats
 var socket = require('socket.io-client')('http://163.172.38.81:9998');
 var si = require('systeminformation');
 var os = require('os');
 var fs = require('fs');
+var microstats = require('microstats');
+/*
+
+ microstats.on('memory', function(value) { console.log('MEMORY:', memory }
+ microstats.on('cpu', function(value) { console.log('CPU:', memory }
+ microstats.on('disk', function(value) { console.log('DISK:', memory }
+
+ let options = {}
+ microstats.start(options, function(err) {
+ if(err) console.log(err);
+ })
+
+ */
 var _local = {};
 var AutoUpdater = require('auto-updater');
 var autoupdater = new AutoUpdater({
