@@ -110,7 +110,9 @@ fs.readFile('/var/lib/node_agent/key.config', 'utf8', function (err,data) {
 
 
     function sendToWs(data,action) {
-        var json = {query:data,timestamp: new Date().getTime(), date: new Date(), hash:hash};
+        var utcMoment = moment();
+        var utcDate = new Date( utcMoment.format() );
+        var json = {query:data,timestamp: new Date().getTime(), date: utcDate, hash:hash};
         var json = JSON.stringify(json);
         socket.emit('data_'+action,json);
     }
