@@ -55,21 +55,21 @@ fs.readFile('/var/lib/node_agent/key.config', 'utf8', function (err,data) {
 
             setInterval(sendServerData, (1000*60*24));
             sendServerData();
-            setInterval(sendMemory, 15000);
+            setInterval(sendMemory, 20000);
             sendMemory
-            setInterval(sendCpu, 10000);
+            setInterval(sendCpu, 1000);
             sendCpu
-            setInterval(sendDisksio, 15000);
+            setInterval(sendDisksio, 10000);
             sendDisksio
-            setInterval(sendFsstats, 15000);
+            setInterval(sendFsstats, 10000);
             sendFsstats
-            setInterval(sendFsSize, 60000*60);
+            setInterval(sendFsSize, 50000);
             sendFsSize();
-            setInterval(sendNetworkCon, (1000)*50);
+            setInterval(sendNetworkCon, (1000)*10);
             sendNetworkCon
             setInterval(sendNetworkStats, (10000));
             sendNetworkStats
-            setInterval(sendPingService, (1000)*30);
+            setInterval(sendPingService, (1000)*20);
             sendPingService
             setInterval(sendServiceCheck, (1000)*20);
             sendServiceCheck
