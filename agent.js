@@ -5,6 +5,7 @@ var si = require('systeminformation');
 var os = require('os');
 var fs = require('fs');
 var microstats = require('microstats');
+var moment = require('moment'); //
 /*
 
  microstats.on('memory', function(value) { console.log('MEMORY:', memory }
@@ -40,7 +41,7 @@ fs.readFile('/var/lib/node_agent/key.config', 'utf8', function (err,data) {
     socket.on('connect', function(){
         socket.emit("message","ok");
     });
-    socket.on('service_list',function(data) { _local.services = JSON.parse(data); });
+    socket.on('service_list',function(data) { _local.services = data; });
 
     socket.on('event', function(data){
         if(data == "request_hash") {
@@ -69,7 +70,7 @@ fs.readFile('/var/lib/node_agent/key.config', 'utf8', function (err,data) {
             sendNetworkCon
             setInterval(sendNetworkStats, 5000);
             sendNetworkStats
-            setInterval(sendPingService, (1000)*10);
+            setInterval(sendPingService, 5000);
             sendPingService
             setInterval(sendServiceCheck, (1000)*10);
             sendServiceCheck
@@ -135,10 +136,10 @@ fs.readFile('/var/lib/node_agent/key.config', 'utf8', function (err,data) {
 
 
     function sendPingService() {
-        var _hosts = ["google.com","bing.com","ovh.com"];
+        var _hosts = ["google.com"];
         for(var i=0;i<_hosts.length;i++) {
             si.inetLatency(_hosts[i], function (d) {
-                sendToWs({host:_hosts[i], ms: d}, "pingservice");
+                sendToWs({ host: "google.com", ms: d}, "pingservice");
             });
         }
     }
@@ -157,12 +158,13 @@ fs.readFile('/var/lib/node_agent/key.config', 'utf8', function (err,data) {
             }
 
         }
-    }
+    }//
 
-
+//
     function sendServiceCheck() {
-        if(typeof _local.services.length > 0) {
-            si.inetLatency(_local.services, function (d) {
+        if(typeof _local.services != "undefined" && _local.services.length > 0) {
+            si.services(_local.services, function (d) {
+                console.log(d);
                 sendToWs(d, "servicecheck");
             });
         }

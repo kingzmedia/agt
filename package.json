@@ -1,6 +1,6 @@
 {
   "name": "agent",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Agent application",
   "main": "agent.js",
   "scripts": {
@@ -22,10 +22,11 @@
   "homepage": "https://github.com/kingzmedia/agt#readme",
   "dependencies": {
     "auto-updater": "^1.0.2",
+    "microstats": "^0.1.2",
     "os": "^0.1.1",
+    "promise": "^7.1.1",
     "socket.io": "^1.7.2",
     "socket.io-client": "^1.7.2",
-    "systeminformation": "^3.16.0",
-    "promise":"^7.1.1"
+    "systeminformation": "^3.16.0"
   }
 }
