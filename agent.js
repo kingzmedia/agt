@@ -247,7 +247,6 @@ fs.readFile('/var/lib/node_agent/key.config', 'utf8', function (err,data) {
             _local.data.cpuload = d.currentload;
         });
         si.networkStats(function (d) {
-            console.log(d);
             _local.data.network_rx_sec = d.rx_sec;
             _local.data.network_tx_sec = d.tx_sec;
         });
