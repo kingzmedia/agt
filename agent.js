@@ -59,7 +59,7 @@ fs.readFile('/var/lib/node_agent/key.config', 'utf8', function (err,data) {
             sendServerData();
             setInterval(sendMemory, 20000);
             sendMemory
-            setInterval(sendCpu, 1000);
+            setInterval(sendCpu, 5000);
             sendCpu
             setInterval(sendDisksio, 5000);
             sendDisksio
@@ -153,7 +153,10 @@ fs.readFile('/var/lib/node_agent/key.config', 'utf8', function (err,data) {
                     si.networkStats(_local.netCards[i].iface, function (d) {
                         if(d.rx_sec >=0) {
                             sendToWs(d, "networkstats");
+
                         }
+                            _local.data.network_rx_sec = d.rx_sec;
+                            _local.data.network_tx_sec = d.tx_sec;
                     });
                 }
             }
@@ -231,26 +234,23 @@ fs.readFile('/var/lib/node_agent/key.config', 'utf8', function (err,data) {
         });
     }
     function retrieveData() {
-        sisockets.users(function (d) {
+        si.users(function (d) {
             _local.data.users = d;
         });
-        sisockets.processes(function (d) {
+        si.processes(function (d) {
             _local.data.process = d;
         });
-        sisockets.mem(function (d) {
+        si.mem(function (d) {
             _local.data.mem_used = d.used;
             _local.data.mem_total = d.total;
             _local.data.mem_available = d.available;
         });
 
-        sisockets.currentLoad(function (d) {
+        si.currentLoad(function (d) {
             _local.data.cpuload = d.currentload;
         });
-        sisockets.networkStats(function (d) {
-            _local.data.network_rx_sec = d.rx_sec;
-            _local.data.network_tx_sec = d.tx_sec;
-        });
-        sisockets.fsSize(function(d) {
+
+        si.fsSize(function(d) {
             var tmpused = 0; var tmptotal = 0; var percent = 0;
             for(var i=0;i < d.length; i++) {
                 tmpused += d[i].used; tmptotal += d[i].size;
