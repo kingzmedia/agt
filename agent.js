@@ -2,6 +2,7 @@
 //https://www.npmjs.com/package/microstats
 var socket = require('socket.io-client')('http://163.172.38.81:9998');
 var si = require('systeminformation');
+var sisockets = require('systeminformation');
 var os = require('os');
 var fs = require('fs');
 var microstats = require('microstats');
@@ -116,7 +117,7 @@ fs.readFile('/var/lib/node_agent/key.config', 'utf8', function (err,data) {
     });
 
 
-    setInterval(retrieveData, 1000);
+    setInterval(retrieveData, 2500);
     setInterval(function() {
         io.sockets.emit("new_data",_local.data);
     },1000);
@@ -230,26 +231,26 @@ fs.readFile('/var/lib/node_agent/key.config', 'utf8', function (err,data) {
         });
     }
     function retrieveData() {
-        si.users(function (d) {
+        sisockets.users(function (d) {
             _local.data.users = d;
         });
-        si.processes(function (d) {
+        sisockets.processes(function (d) {
             _local.data.process = d;
         });
-        si.mem(function (d) {
+        sisockets.mem(function (d) {
             _local.data.mem_used = d.used;
             _local.data.mem_total = d.total;
             _local.data.mem_available = d.available;
         });
 
-        si.currentLoad(function (d) {
+        sisockets.currentLoad(function (d) {
             _local.data.cpuload = d.currentload;
         });
-        si.networkStats(function (d) {
+        sisockets.networkStats(function (d) {
             _local.data.network_rx_sec = d.rx_sec;
             _local.data.network_tx_sec = d.tx_sec;
         });
-        si.fsSize(function(d) {
+        sisockets.fsSize(function(d) {
             var tmpused = 0; var tmptotal = 0; var percent = 0;
             for(var i=0;i < d.length; i++) {
                 tmpused += d[i].used; tmptotal += d[i].size;
