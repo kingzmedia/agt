@@ -240,12 +240,14 @@ fs.readFile('/var/lib/node_agent/key.config', 'utf8', function (err,data) {
         si.mem(function (d) {
             _local.data.mem_used = d.used;
             _local.data.mem_total = d.total;
+            _local.data.mem_available = d.available;
         });
 
         si.currentLoad(function (d) {
             _local.data.cpuload = d.currentload;
         });
         si.networkStats(function (d) {
+            console.log(d);
             _local.data.network_rx_sec = d.rx_sec;
             _local.data.network_tx_sec = d.tx_sec;
         });
