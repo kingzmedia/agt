@@ -164,7 +164,6 @@ fs.readFile('/var/lib/node_agent/key.config', 'utf8', function (err,data) {
     function sendServiceCheck() {
         if(typeof _local.services != "undefined" && _local.services.length > 0) {
             si.services(_local.services, function (d) {
-                console.log(d);
                 sendToWs(d, "servicecheck");
             });
         }
