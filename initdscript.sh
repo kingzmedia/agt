@@ -1,62 +1,72 @@
 #!/bin/bash
-#
-# description: DevShelf service
-# processname: node
-# pidfile: /var/run/devshelf.pid
-# logfile: /var/log/devshelf.log
-#
-# Based on https://gist.github.com/jinze/3748766
-#
-# To use it as service on Ubuntu:
-# sudo cp devshelf.sh /etc/init.d/devshelf
-# sudo chmod a+x /etc/init.d/devshelf
-# sudo update-rc.d devshelf defaults
-#
-# Then use commands:
-# service devshelf <command (start|stop|etc)>
 
 NAME=node_agent
-SOUREC_DIR=/var/lib/node_agent
-COMMAND=node
+SOURCE_DIR=/var/lib/node_agent
 SOURCE_NAME=agent.js
+COMMAND=node
+
 USER=root
-NODE_ENVIROMENT=production
+NODE_ENVIRONMENT=production
 
 pidfile=/var/log/$NAME.pid
 logfile=/var/log/$NAME.log
+forever_dir=/var/run/forever
+
 forever=forever
+node=node
+sed=sed
 
 start() {
-    export NODE_ENV=$NODE_ENVIROMENT
+    export NODE_ENV=$NODE_ENVIRONMENT
     echo "Starting $NAME node instance : "
 
-    touch $logfile
-    chown $USER $logfile
+    if [ "$foreverid" == "" ]; then
+        touch $logfile
+        chown $USER $logfile
 
-    touch $pidfile
-    chown $USER $pidfile
+        touch $pidfile
+        chown $USER $pidfile
 
-    $forever start --pidFile $pidfile -l $logfile -a --sourceDir $SOUREC_DIR -w agent.js -c $COMMAND $SOURCE_NAME
-
-    RETVAL=$?
+        $forever start -p $forever_dir --pidFile $pidfile -l $logfile \
+            -a --sourceDir $SOURCE_DIR -w $SOURCE_NAME -c $COMMAND $SOURCE_NAME
+        RETVAL=$?
+    else
+        echo "Instance already running"
+        RETVAL=0
+    fi
 }
 
 restart() {
-    echo -n "Restarting $NAME node instance : "
-    $forever restart $SOURCE_NAME
-    RETVAL=$?
-}
-
-status() {
-    echo "Status for $NAME:"
-    $forever list
-    RETVAL=$?
+    stop
+    start
 }
 
 stop() {
     echo -n "Shutting down $NAME node instance : "
-    $forever stop $SOURCE_NAME
+    if [ "$foreverid" != "" ]; then
+        cd $SOURCE_DIR && $forever stop $pid
+    else
+        echo "Instance is not running";
+    fi
+    RETVAL=$?
 }
+
+status() {
+    $forever list
+}
+
+if [ -f $pidfile ]; then
+    read pid < $pidfile
+else
+    pid=""
+fi
+
+if [ "$pid" != "" ]; then
+    sed1="/$pid/p"
+    foreverid=`$forever list -p $forever_dir | $sed -n $sed1`
+else
+    foreverid=""
+fi
 
 case "$1" in
     start)
