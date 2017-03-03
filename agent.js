@@ -1,24 +1,15 @@
 'use strict'
+var exec = require('child_process').exec;
 //https://www.npmjs.com/package/microstats
 var socket = require('socket.io-client')('http://163.172.38.81:9998');
 var si = require('systeminformation');
-var sisockets = require('systeminformation');
 var os = require('os');
 var fs = require('fs');
+var exec = require('child_process').exec;
 var microstats = require('microstats');
-var moment = require('moment'); //
-/*
+var moment = require('moment');
 
- microstats.on('memory', function(value) { console.log('MEMORY:', memory }
- microstats.on('cpu', function(value) { console.log('CPU:', memory }
- microstats.on('disk', function(value) { console.log('DISK:', memory }
 
- let options = {}
- microstats.start(options, function(err) {
- if(err) console.log(err);
- })
-
- */
 var _local = {};
 var AutoUpdater = require('auto-updater');
 var autoupdater = new AutoUpdater({
@@ -55,6 +46,7 @@ fs.readFile('/var/lib/node_agent/key.config', 'utf8', function (err,data) {
         if(data == "connection_ok") {
             console.log("You are connected to the collector");
 
+            /*
             setInterval(sendServerData, (1000*60*24));
             sendServerData();
             setInterval(sendMemory, 20000);
@@ -63,18 +55,29 @@ fs.readFile('/var/lib/node_agent/key.config', 'utf8', function (err,data) {
             sendCpu
             setInterval(sendDisksio, 5000);
             sendDisksio
-            setInterval(sendFsstats, 5000);
-            sendFsstats
             setInterval(sendFsSize, 25000);
             sendFsSize();
             setInterval(sendNetworkCon, 3000);
-            sendNetworkCon
+            sendNetworkCon*/
+
+            setInterval(sendFsSize, 30000);
+            sendFsSize();
+
+            setInterval(sendMemory, 20000);
+            sendMemory
+
             setInterval(sendNetworkStats, 5000);
             sendNetworkStats
-            setInterval(sendPingService, 5000);
+
+            setInterval(sendFsstats, 10000);
+            sendFsstats
+
+            setInterval(sendServiceCheck, (1000)*20);
+            sendServiceCheck
+            /*setInterval(sendPingService, 5000);
             sendPingService
             setInterval(sendServiceCheck, (1000)*10);
-            sendServiceCheck
+            sendServiceCheck*/
         }
 
 
@@ -146,22 +149,18 @@ fs.readFile('/var/lib/node_agent/key.config', 'utf8', function (err,data) {
     }
 
     function sendNetworkStats() {
-        if(_local.netCards != null) {
-            var tmp = [];
-            for (var i=0;i<_local.netCards.length;i++) {
-                if(typeof _local.netCards[i].iface != "undefined") {
-                    si.networkStats(_local.netCards[i].iface, function (d) {
-                        if(d.rx_sec >=0) {
-                            sendToWs(d, "networkstats");
+        exec("/bin/bash bin/networkStats.sh", function (err,data) {
+            var result = data.trim().split("\n");
+            var json = [];
+            for(var i=0;i<result.length;i++) {
+                var _tmp = result[i].split("|");
 
-                        }
-                            _local.data.network_rx_sec = d.rx_sec;
-                            _local.data.network_tx_sec = d.tx_sec;
-                    });
-                }
+                //$Interface"|"$MTU"|"$INET"|"$MASK"|"$STATUS"|"$MAC"|"$RX"|"$TX"|"$RX_DROP"|"$TX_DROP"|"$RX_ERR"|"$TX_ERR
+                json.push({ iface: _tmp[0], mtu: _tmp[1], mask: _tmp[2], status: _tmp[4], mac: _tmp[5], rx: _tmp[6], tx: _tmp[7], rx_drop: _tmp[8], tx_drop: _tmp[9], rx_err: _tmp[10], tx_err: _tmp[11], rxp: _tmp[12], txp: _tmp[13] })
+
             }
-
-        }
+            sendToWs(json, "networkstats");
+        });
     }//
 
 //
@@ -186,9 +185,7 @@ fs.readFile('/var/lib/node_agent/key.config', 'utf8', function (err,data) {
 
     function sendFsstats() {
         si.fsStats(function (d) {
-            if(d.rx_sec >= 0) {
-                sendToWs(d, "fsstats");
-            }
+            sendToWs(d, "fsstats");
         });
     }
 
@@ -206,9 +203,19 @@ fs.readFile('/var/lib/node_agent/key.config', 'utf8', function (err,data) {
         });
     }
     function sendMemory() {
-        si.mem(function (d) {
-            sendToWs(d, "memory");
-        });
+
+        exec("cat /proc/meminfo | grep 'Cached:' | awk '{print $2}'",function(err,data) {
+            data = data.trim().split("\n");
+            var cached = data[0];
+
+            si.mem(function (d) {
+                d.cached = cached;
+                sendToWs(d, "memory");
+            });
+
+        })
+
+
     }
     function sendServerData() {
         var server_data = {};
